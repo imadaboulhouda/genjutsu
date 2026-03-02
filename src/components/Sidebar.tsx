@@ -38,7 +38,7 @@ const Sidebar = ({ onAction }: SidebarProps) => {
         let query = supabase
           .from("profiles")
           .select("*")
-          .limit(10);
+          .limit(30);
 
         if (user) {
           query = query.neq("user_id", user.id);
@@ -47,21 +47,23 @@ const Sidebar = ({ onAction }: SidebarProps) => {
         const { data: profiles, error: profilesError } = await query;
         if (profilesError) throw profilesError;
 
-        if (user && profiles) {
-          const { data: follows } = await supabase
-            .from("follows")
-            .select("following_id")
-            .eq("follower_id", user.id);
+        if (profiles) {
+          let candidates = profiles as SuggestedProfile[];
 
-          const followedSet = new Set((follows || []).map(f => f.following_id));
-          setFollowingIds(followedSet);
+          if (user) {
+            const { data: follows } = await supabase
+              .from("follows")
+              .select("following_id")
+              .eq("follower_id", user.id);
 
-          const notFollowed = (profiles as SuggestedProfile[])
-            .filter(p => !followedSet.has(p.user_id));
+            const followedSet = new Set((follows || []).map(f => f.following_id));
+            setFollowingIds(followedSet);
+            candidates = candidates.filter(p => !followedSet.has(p.user_id));
+          }
 
-          setSuggestedDevs(notFollowed.slice(0, 3));
-        } else {
-          setSuggestedDevs((profiles as SuggestedProfile[] || []).slice(0, 3));
+          // Randomize and pick 3
+          const shuffled = [...candidates].sort(() => 0.5 - Math.random());
+          setSuggestedDevs(shuffled.slice(0, 3));
         }
       } catch (error) {
         console.error("Error fetching suggestions:", error);

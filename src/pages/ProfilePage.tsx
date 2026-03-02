@@ -375,8 +375,14 @@ const ProfilePage = () => {
                                     ) : (
                                         <div className="flex items-center gap-2">
                                             <button
-                                                onClick={() => navigate(`/whisper/${profile.username}`)}
-                                                className="p-2.5 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-all gum-border"
+                                                onClick={() => {
+                                                    if (!user) {
+                                                        toast.error("Please sign in to send messages");
+                                                        return;
+                                                    }
+                                                    navigate(`/whisper/${profile.username}`);
+                                                }}
+                                                className="p-2 gum-card bg-secondary text-muted-foreground hover:text-primary transition-colors"
                                                 title="Whisper"
                                             >
                                                 <Send size={18} />

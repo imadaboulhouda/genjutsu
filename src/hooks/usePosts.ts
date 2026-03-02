@@ -131,8 +131,13 @@ export function usePosts() {
   return {
     posts,
     loading: status === "pending",
-    createPost: (content: string, code: string, tags: string[], media_url?: string) =>
-      createPostMutation.mutateAsync({ content, code, tags, media_url }),
+    createPost: (content: string, code: string, tags: string[], media_url?: string) => {
+      if (!user) {
+        toast.error("Please sign in to share a post");
+        return;
+      }
+      return createPostMutation.mutateAsync({ content, code, tags, media_url });
+    },
     toggleLike,
     toggleBookmark,
     deletePost,

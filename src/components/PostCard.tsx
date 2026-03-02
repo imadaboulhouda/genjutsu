@@ -172,7 +172,13 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
             </Link>
             {!isOwner && (
               <button
-                onClick={() => navigate(`/whisper/${post.profiles?.username}`)}
+                onClick={() => {
+                  if (!user) {
+                    toast.error("Please sign in to send messages");
+                    return;
+                  }
+                  navigate(`/whisper/${post.profiles?.username}`);
+                }}
                 className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
                 title="Whisper to author"
               >

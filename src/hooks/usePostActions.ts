@@ -153,10 +153,26 @@ export function usePostActions() {
     });
 
     return {
-        toggleLike: (postId: string, currentlyLiked: boolean) =>
-            toggleLikeMutation.mutate({ postId, currentlyLiked }),
-        toggleBookmark: (postId: string, currentlyBookmarked: boolean) =>
-            toggleBookmarkMutation.mutate({ postId, currentlyBookmarked }),
-        deletePost: (postId: string) => deletePostMutation.mutate(postId),
+        toggleLike: (postId: string, currentlyLiked: boolean) => {
+            if (!user) {
+                toast.error("Please sign in to like posts");
+                return;
+            }
+            toggleLikeMutation.mutate({ postId, currentlyLiked });
+        },
+        toggleBookmark: (postId: string, currentlyBookmarked: boolean) => {
+            if (!user) {
+                toast.error("Please sign in to bookmark posts");
+                return;
+            }
+            toggleBookmarkMutation.mutate({ postId, currentlyBookmarked });
+        },
+        deletePost: (postId: string) => {
+            if (!user) {
+                toast.error("Please sign in to delete posts");
+                return;
+            }
+            deletePostMutation.mutate(postId);
+        },
     };
 }

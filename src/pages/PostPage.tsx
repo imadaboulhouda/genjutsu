@@ -103,7 +103,7 @@ const PostPage = () => {
     const handleComment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user) {
-            toast.error("Sign in to comment");
+            toast.error("Please sign in to comment");
             return;
         }
         if (!commentText.trim() || submittingComment) return;

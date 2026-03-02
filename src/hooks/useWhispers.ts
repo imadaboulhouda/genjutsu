@@ -163,7 +163,13 @@ export function useWhispers(targetUserId?: string) {
         loadingConversations,
         messages,
         loadingMessages,
-        sendMessage: sendMessageMutation.mutateAsync,
+        sendMessage: async (content: string) => {
+            if (!user) {
+                toast.error("Please sign in to send message");
+                return;
+            }
+            return sendMessageMutation.mutateAsync(content);
+        },
         isSending: sendMessageMutation.isPending,
     };
 }

@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { useWhispers } from "@/hooks/useWhispers";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
-import { Send, Loader2, ArrowLeft } from "lucide-react";
+import { Send, Loader2, ArrowLeft, LogIn } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 const WhispersPage = () => {
+    const { user } = useAuth();
     const { conversations, loadingConversations } = useWhispers();
     const navigate = useNavigate();
 
@@ -39,6 +41,25 @@ const WhispersPage = () => {
                         {loadingConversations ? (
                             <div className="flex justify-center py-20">
                                 <Loader2 className="animate-spin text-primary" size={32} />
+                            </div>
+                        ) : !user ? (
+                            <div className="gum-card p-12 text-center flex flex-col items-center gap-4 bg-secondary/20 border-dashed">
+                                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+                                    <LogIn size={32} className="text-primary/50" />
+                                </div>
+                                <div className="max-w-sm">
+                                    <h3 className="font-bold text-lg">Identity unknown</h3>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        Sign in to see your whispers and start new ephemeral conversations.
+                                    </p>
+                                    <button
+                                        onClick={() => navigate("/auth")}
+                                        className="mt-6 gum-btn bg-primary text-primary-foreground text-sm flex items-center gap-2 mx-auto"
+                                    >
+                                        <LogIn size={16} />
+                                        Get Started
+                                    </button>
+                                </div>
                             </div>
                         ) : conversations && conversations.length > 0 ? (
                             <div className="space-y-3">
