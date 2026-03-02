@@ -32,6 +32,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
         toast.error("File size must be less than 5MB");
         return;
       }
+      if (mediaPreview) URL.revokeObjectURL(mediaPreview);
       setMediaFile(file);
       setMediaPreview(URL.createObjectURL(file));
     }
@@ -74,7 +75,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
       }
 
       const tags = extractTags(content);
-      const cleanContent = content.replace(/#\w+/g, "").trim();
+      const cleanContent = content.replace(/#\w+/g, "").replace(/\s+/g, " ").trim();
 
       await onPost(cleanContent || content, code, tags, mediaUrl);
 
@@ -82,6 +83,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
       setCode("");
       setShowCode(false);
       setMediaFile(null);
+      if (mediaPreview) URL.revokeObjectURL(mediaPreview);
       setMediaPreview(null);
     } catch (err: any) {
       console.error(err);

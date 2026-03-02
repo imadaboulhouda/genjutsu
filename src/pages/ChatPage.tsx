@@ -32,6 +32,11 @@ const ChatPage = () => {
 
                 if (error) throw error;
                 if (!data) throw new Error("User not found");
+                if (user && data.user_id === user.id) {
+                    toast.error("You can't whisper to yourself!");
+                    navigate("/whispers");
+                    return;
+                }
                 setTargetProfile(data);
             } catch (err: any) {
                 console.error("Profile load error:", err);

@@ -1,8 +1,8 @@
-import { Eye, Home, Search, Bell, User, LogOut, Settings, Hash, X, Send } from "lucide-react";
+import { Home, Search, User, LogOut, Settings, Hash, X, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ModeToggle } from "@/components/ModeToggle";
 import { useState } from "react";
 import Sidebar from "./Sidebar";
@@ -18,6 +18,7 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const initials = profile?.display_name
@@ -51,7 +52,7 @@ const Navbar = () => {
               <button
                 key={label}
                 onClick={() => navigate(path)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${window.location.pathname === path
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname === path
                   ? "bg-primary text-primary-foreground gum-shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   }`}

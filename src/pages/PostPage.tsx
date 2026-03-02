@@ -138,7 +138,7 @@ const PostPage = () => {
 
     useEffect(() => {
         fetchPost();
-    }, [postId, user]);
+    }, [postId, user?.id]);
 
     const handleLike = async (id: string, currentlyLiked: boolean) => {
         if (!user) {

@@ -37,7 +37,7 @@ export function useProfile() {
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user?.id]);
 
   const updateProfile = async (updates: Partial<Pick<Profile, "display_name" | "bio" | "avatar_url" | "banner_url">>) => {
     if (!user) return { error: "Not authenticated" };

@@ -48,6 +48,7 @@ export function usePosts() {
     if (!postsData) return [];
 
     const postIds = postsData.map(p => p.id);
+    if (postIds.length === 0) return [];
 
     // Fetch likes counts
     const [{ data: likesData }, { data: commentsData }] = await Promise.all([

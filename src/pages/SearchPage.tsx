@@ -30,11 +30,19 @@ const SearchPage = () => {
 
         setLoading(true);
         try {
+            // Sanitize input to prevent broken PostgREST filters
+            const sanitized = val.replace(/[%_(),."'\\]/g, "");
+            if (!sanitized.trim()) {
+                setResults({ profiles: [], posts: [] });
+                setLoading(false);
+                return;
+            }
+
             // 1. Search Profiles
             const { data: profiles } = await supabase
                 .from("profiles")
                 .select("*")
-                .or(`username.ilike.%${val}%,display_name.ilike.%${val}%`)
+                .or(`username.ilike.%${sanitized}%,display_name.ilike.%${sanitized}%`)
                 .limit(10);
 
             // 2. Search Posts
@@ -44,7 +52,7 @@ const SearchPage = () => {
                     id, content, code, media_url, tags, created_at, user_id,
                     profiles ( username, display_name, avatar_url )
                 `)
-                .or(`content.ilike.%${val}%,tags.cs.{${val.replace('#', '')}}`)
+                .or(`content.ilike.%${sanitized}%,tags.cs.{${sanitized.replace('#', '')}}`)
                 .gt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
                 .order("created_at", { ascending: false })
                 .limit(20);

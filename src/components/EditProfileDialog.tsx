@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -31,6 +31,15 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
     const [bannerUrl, setBannerUrl] = useState(currentProfile.banner_url || "");
     const [submitting, setSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            setDisplayName(currentProfile.display_name);
+            setBio(currentProfile.bio || "");
+            setAvatarUrl(currentProfile.avatar_url || "");
+            setBannerUrl(currentProfile.banner_url || "");
+        }
+    }, [open, currentProfile]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

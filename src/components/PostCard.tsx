@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Hash, Heart, MessageSquare, Repeat2, Share, Bookmark, MoreHorizontal, Trash2, Send } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Hash, Heart, MessageSquare, Share, Bookmark, MoreHorizontal, Trash2, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { PostWithProfile } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
@@ -47,6 +47,18 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
   const { user } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showMenu]);
 
   const initials = post.profiles?.display_name
     ?.split(" ")
@@ -84,7 +96,7 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
               <span className="text-primary/70 text-[10px] font-bold ml-2">[{getTimeRemaining(post.created_at)}]</span>
             </button>
             {isOwner && (
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="p-1 rounded-lg hover:bg-secondary transition-colors"
@@ -166,6 +178,12 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
                 <Send size={15} />
               </button>
             )}
+            <button
+              onClick={() => onBookmark(post.id, post.user_bookmarked)}
+              className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${post.user_bookmarked ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-500"}`}
+            >
+              <Bookmark size={15} fill={post.user_bookmarked ? "currentColor" : "none"} />
+            </button>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.origin + "/post/" + post.id);

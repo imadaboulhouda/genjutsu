@@ -5,7 +5,7 @@ import { PostWithProfile } from "@/hooks/usePosts";
 import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
-import { Edit3, Loader2, ArrowLeft, Calendar, Link as LinkIcon, UserPlus, UserCheck, Trash2, LogOut, MoreHorizontal, ImageIcon, Send } from "lucide-react";
+import { Loader2, ArrowLeft, Calendar, ImageIcon, Send, Bookmark } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -38,7 +38,9 @@ const ProfilePage = () => {
     const { username } = useParams<{ username: string }>();
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [posts, setPosts] = useState<PostWithProfile[]>([]);
+    const [bookmarks, setBookmarks] = useState<PostWithProfile[]>([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<"posts" | "bookmarks">("posts");
 
     const [followsModalOpen, setFollowsModalOpen] = useState(false);
     const [followsModalType, setFollowsModalType] = useState<"followers" | "following">("followers");
@@ -130,7 +132,82 @@ const ProfilePage = () => {
 
     useEffect(() => {
         fetchData();
-    }, [username, user]);
+    }, [username, user?.id]);
+
+    // Fetch bookmarked posts (only for own profile)
+    const fetchBookmarks = async () => {
+        if (!user || !profile || user.id !== profile.user_id) return;
+
+        try {
+            const { data: bookmarkRows } = await supabase
+                .from("bookmarks")
+                .select("post_id")
+                .eq("user_id", user.id);
+
+            if (!bookmarkRows || bookmarkRows.length === 0) {
+                setBookmarks([]);
+                return;
+            }
+
+            const postIds = bookmarkRows.map((b: any) => b.post_id);
+
+            const { data: postsData } = await supabase
+                .from("posts")
+                .select(`
+                    id, content, code, media_url, tags, created_at, user_id,
+                    profiles ( username, display_name, avatar_url )
+                `)
+                .in("id", postIds)
+                .gt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+                .order("created_at", { ascending: false });
+
+            if (!postsData || postsData.length === 0) {
+                setBookmarks([]);
+                return;
+            }
+
+            const activePostIds = postsData.map(p => p.id);
+
+            const [{ data: likesData }, { data: commentsData }] = await Promise.all([
+                supabase.from("likes").select("post_id").in("post_id", activePostIds),
+                supabase.from("comments").select("post_id").in("post_id", activePostIds),
+            ]);
+
+            const likesCounts: Record<string, number> = {};
+            (likesData || []).forEach((l: any) => {
+                likesCounts[l.post_id] = (likesCounts[l.post_id] || 0) + 1;
+            });
+
+            const commentsCounts: Record<string, number> = {};
+            (commentsData || []).forEach((c: any) => {
+                commentsCounts[c.post_id] = (commentsCounts[c.post_id] || 0) + 1;
+            });
+
+            const [{ data: myLikes }] = await Promise.all([
+                supabase.from("likes").select("post_id").eq("user_id", user.id).in("post_id", activePostIds),
+            ]);
+            const userLikes = new Set((myLikes || []).map((l: any) => l.post_id));
+
+            const enriched = postsData.map(post => ({
+                ...post,
+                profiles: post.profiles as any,
+                likes_count: likesCounts[post.id] || 0,
+                user_liked: userLikes.has(post.id),
+                user_bookmarked: true,
+                comments_count: commentsCounts[post.id] || 0
+            } as PostWithProfile));
+
+            setBookmarks(enriched);
+        } catch (err) {
+            console.error("Error fetching bookmarks:", err);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === "bookmarks" && profile && user?.id === profile.user_id) {
+            fetchBookmarks();
+        }
+    }, [activeTab, profile?.user_id, user?.id]);
 
     const { toggleLike, toggleBookmark, deletePost } = usePostActions();
 
@@ -163,7 +240,7 @@ const ProfilePage = () => {
         }
 
         toggleBookmark(postId, currentlyBookmarked);
-        // Local state sync
+        // Local state sync for posts
         setPosts((prev) =>
             prev.map((p) => {
                 if (p.id === postId) {
@@ -172,6 +249,15 @@ const ProfilePage = () => {
                 return p;
             })
         );
+        // If unbookmarking, instantly remove from bookmarks list
+        if (currentlyBookmarked) {
+            setBookmarks((prev) => prev.filter((p) => p.id !== postId));
+        } else {
+            // If bookmarking, update the bookmark state in bookmarks list too
+            setBookmarks((prev) =>
+                prev.map((p) => p.id === postId ? { ...p, user_bookmarked: true } : p)
+            );
+        }
     };
 
     const handleDelete = async (postId: string) => {
@@ -346,21 +432,69 @@ const ProfilePage = () => {
                         </div>
 
                         <div className="space-y-6">
-                            <h2 className="font-bold text-lg px-2">Posts</h2>
-                            {posts.length === 0 ? (
-                                <div className="gum-card p-12 text-center text-muted-foreground text-sm">
-                                    No posts yet.
+                            {isOwnProfile ? (
+                                <div className="flex gap-2 border-b border-border pb-px mb-4">
+                                    {(["posts", "bookmarks"] as const).map((tab) => (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setActiveTab(tab)}
+                                            className={`px-6 py-2.5 text-sm font-bold capitalize transition-all relative flex items-center gap-2 ${activeTab === tab ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                                        >
+                                            {tab === "bookmarks" && <Bookmark size={14} />}
+                                            {tab}
+                                            {activeTab === tab && (
+                                                <motion.div
+                                                    layoutId="profileTab"
+                                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                                                />
+                                            )}
+                                        </button>
+                                    ))}
                                 </div>
                             ) : (
-                                posts.map(post => (
-                                    <PostCard
-                                        key={post.id}
-                                        post={post}
-                                        onLike={handleLike}
-                                        onBookmark={handleBookmark}
-                                        onDelete={handleDelete}
-                                    />
-                                ))
+                                <h2 className="font-bold text-lg px-2">Posts</h2>
+                            )}
+
+                            {activeTab === "posts" ? (
+                                posts.length === 0 ? (
+                                    <div className="gum-card p-12 text-center text-muted-foreground text-sm">
+                                        No posts yet.
+                                    </div>
+                                ) : (
+                                    posts.map(post => (
+                                        <PostCard
+                                            key={post.id}
+                                            post={post}
+                                            onLike={handleLike}
+                                            onBookmark={handleBookmark}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))
+                                )
+                            ) : (
+                                bookmarks.length === 0 ? (
+                                    <div className="gum-card p-12 text-center flex flex-col items-center gap-4 bg-secondary/20 border-dashed">
+                                        <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+                                            <Bookmark size={32} className="text-primary/50" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg">No bookmarks yet</h3>
+                                            <p className="text-sm text-muted-foreground mt-1">
+                                                Save posts to find them later. Bookmarked posts still vanish after 24 hours.
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    bookmarks.map(post => (
+                                        <PostCard
+                                            key={post.id}
+                                            post={post}
+                                            onLike={handleLike}
+                                            onBookmark={handleBookmark}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))
+                                )
                             )}
                         </div>
                     </div>
