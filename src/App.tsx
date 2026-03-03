@@ -18,6 +18,7 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import WhispersPage from "./pages/WhispersPage";
 import ChatPage from "./pages/ChatPage";
+import PlayPage from "./pages/PlayPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => {
                   <Route path="/search" element={<SearchPage />} />
                   <Route path="/whispers" element={<WhispersPage />} />
                   <Route path="/whisper/:username" element={<ChatPage />} />
+                  <Route path="/play" element={<PlayPage />} />
                   <Route path="/:username" element={<ProfilePage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

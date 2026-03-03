@@ -1,4 +1,4 @@
-import { Home, Search, User, LogOut, Settings, Hash, X, Send } from "lucide-react";
+import { Home, Search, User, LogOut, Settings, Hash, X, Send, Swords } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -48,6 +48,7 @@ const Navbar = () => {
               { icon: Home, label: "Feed", path: "/" },
               { icon: Search, label: "Search", path: "/search" },
               { icon: Send, label: "Whispers", path: "/whispers" },
+              { icon: Swords, label: "Play", path: "/play" },
             ].map(({ icon: Icon, label, path }) => (
               <button
                 key={label}
@@ -68,8 +69,29 @@ const Navbar = () => {
               <ModeToggle />
             </div>
             <button
+              onClick={() => navigate("/")}
+              className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              title="Feed"
+            >
+              <Home size={16} />
+            </button>
+            <button
+              onClick={() => navigate("/search")}
+              className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              title="Search"
+            >
+              <Search size={16} />
+            </button>
+            <button
+              onClick={() => navigate("/play")}
+              className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              title="Play"
+            >
+              <Swords size={16} />
+            </button>
+            <button
               onClick={() => navigate("/whispers")}
-              className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Whispers"
             >
               <Send size={16} />
