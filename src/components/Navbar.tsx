@@ -1,4 +1,4 @@
-import { Home, Search, User, LogOut, Settings, Hash, X, Send, Swords } from "lucide-react";
+import { Home, Search, User, LogOut, Settings, Hash, X, Send, Swords, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -36,7 +36,7 @@ const Navbar = () => {
         className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b-2 border-border"
       >
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <button onClick={() => navigate("/")} className="flex items-center gap-2">
+          <button onClick={() => navigate("/")} className="flex items-center gap-1 sm:gap-2 shrink-0">
             <div className="w-8 h-8 rounded-[3px] overflow-hidden gum-border">
               <img src="/fav.jpg" alt="genjutsu" className="w-full h-full object-cover" />
             </div>
@@ -64,41 +64,41 @@ const Navbar = () => {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1.5 sm:gap-4">
+          <div className="flex items-center gap-1 sm:gap-4">
             <div className="hidden sm:block">
               <ModeToggle />
             </div>
             <button
               onClick={() => navigate("/")}
-              className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Feed"
             >
               <Home size={16} />
             </button>
             <button
               onClick={() => navigate("/search")}
-              className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Search"
             >
               <Search size={16} />
             </button>
             <button
               onClick={() => navigate("/play")}
-              className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Play"
             >
               <Swords size={16} />
             </button>
             <button
               onClick={() => navigate("/whispers")}
-              className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Whispers"
             >
               <Send size={16} />
             </button>
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-secondary text-primary transition-colors gum-border"
+              className="lg:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-primary transition-colors gum-border"
               title="Discovery"
             >
               <Hash size={16} />
@@ -107,7 +107,7 @@ const Navbar = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 group">
+                  <button className="flex items-center gap-1 sm:gap-2 group">
                     <div className="hidden md:flex flex-col items-end mr-1">
                       <span className="text-sm font-bold group-hover:underline leading-none">{profile?.display_name}</span>
                       <span className="text-[10px] text-muted-foreground leading-none mt-1">@{profile?.username}</span>
@@ -119,7 +119,7 @@ const Navbar = () => {
                     </div>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 gum-border">
+                <DropdownMenuContent align="end" className="w-48 gum-border text-xs sm:text-sm">
                   <div className="px-2 py-1.5 md:hidden border-b border-border mb-1">
                     <p className="text-sm font-bold truncate">{profile?.display_name}</p>
                     <p className="text-[10px] text-muted-foreground truncate">@{profile?.username}</p>
@@ -147,9 +147,10 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={() => navigate("/auth")}
-                className="gum-btn bg-primary text-primary-foreground text-sm"
+                className="gum-btn bg-primary text-primary-foreground text-xs sm:text-sm px-2.5 sm:px-5 py-1.5 sm:py-2.5 flex items-center gap-2 whitespace-nowrap"
               >
-                Sign In
+                <LogIn size={16} />
+                <span className="hidden sm:inline">Sign In</span>
               </button>
             )}
           </div>
