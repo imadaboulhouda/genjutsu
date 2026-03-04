@@ -21,7 +21,8 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
   const { profile } = useProfile();
 
   const extractTags = (text: string): string[] => {
-    const matches = text.match(/#(\w+)/g);
+    // Unicode-aware regex to match hashtags in any language
+    const matches = text.match(/#([\p{L}\p{N}_]+)/gu);
     return matches ? matches.map((t) => t.slice(1).toLowerCase()) : [];
   };
 
@@ -75,7 +76,8 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
       }
 
       const tags = extractTags(content);
-      const cleanContent = content.replace(/#\w+/g, "").replace(/\s+/g, " ").trim();
+      // Clean content by removing hashtags (Unicode supporting regex)
+      const cleanContent = content.replace(/#[\p{L}\p{N}_]+/gu, "").replace(/\s+/g, " ").trim();
 
       await onPost(cleanContent || content, code, tags, mediaUrl);
 

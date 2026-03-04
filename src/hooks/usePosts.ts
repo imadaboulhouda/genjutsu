@@ -121,6 +121,7 @@ export function usePosts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["trending-tags"] });
       toast.success("Post shared!");
     },
     onError: (error) => {

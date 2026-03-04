@@ -272,238 +272,231 @@ const ProfilePage = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-background text-foreground">
-                <Navbar />
-                <main className="max-w-6xl mx-auto px-4 py-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
-                        <div className="space-y-6">
-                            <PostSkeleton />
-                            <PostSkeleton />
-                            <PostSkeleton />
-                        </div>
-                        <div className="hidden lg:block">
-                            <Sidebar />
-                        </div>
-                    </div>
-                </main>
-            </div>
-        );
-    }
-
-
-    if (!profile) return null;
-
-    const initials = profile.display_name.substring(0, 2).toUpperCase();
-    const isOwnProfile = user?.id === profile.user_id;
+    const initials = profile?.display_name?.substring(0, 2).toUpperCase() || "??";
+    const isOwnProfile = user?.id === profile?.user_id;
 
     return (
         <div className="min-h-screen bg-background text-foreground">
-            <Helmet>
-                <title>{profile.display_name} (@{profile.username}) — genjutsu</title>
-                <meta name="description" content={profile.bio || `Check out ${profile.display_name}'s profile on genjutsu.`} />
-                <meta property="og:title" content={`${profile.display_name} (@${profile.username}) — genjutsu`} />
-                <meta property="og:description" content={profile.bio || `Check out ${profile.display_name}'s profile on genjutsu.`} />
-                <meta property="og:image" content={profile.avatar_url || "/fav.jpg"} />
-            </Helmet>
+            {profile && (
+                <Helmet>
+                    <title>{profile.display_name} (@{profile.username}) — genjutsu</title>
+                    <meta name="description" content={profile.bio || `Check out ${profile.display_name}'s profile on genjutsu.`} />
+                    <meta property="og:title" content={`${profile.display_name} (@${profile.username}) — genjutsu`} />
+                    <meta property="og:description" content={profile.bio || `Check out ${profile.display_name}'s profile on genjutsu.`} />
+                    <meta property="og:image" content={profile.avatar_url || "/fav.jpg"} />
+                </Helmet>
+            )}
             <Navbar />
             <main className="max-w-6xl mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
                     <div className="space-y-4">
-                        <Link
-                            to="/"
-                            className="inline-flex items-center gap-2 px-3 py-1.5 gum-card bg-secondary text-xs font-bold hover:bg-primary hover:text-primary-foreground transition-colors w-fit"
-                        >
-                            <ArrowLeft size={14} />
-                            Back to Home
-                        </Link>
-                        <div className="gum-card overflow-hidden mb-8">
-                            <div className="h-48 bg-secondary relative overflow-hidden flex items-center justify-center">
-                                {profile.banner_url ? (
-                                    <img
-                                        src={profile.banner_url}
-                                        alt="Banner"
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex flex-col items-center gap-2 opacity-20">
-                                        <ImageIcon size={48} />
-                                        <span className="text-xs font-bold uppercase tracking-widest">Genjutsu Illusion</span>
-                                    </div>
-                                )}
+                        {loading ? (
+                            <div className="space-y-6">
+                                <PostSkeleton />
+                                <PostSkeleton />
+                                <PostSkeleton />
                             </div>
-                            <div className="px-6 pb-6 relative">
-                                <div className="absolute -top-12 left-6">
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <div className="w-24 h-24 rounded-[3px] gum-border bg-secondary flex items-center justify-center text-3xl font-bold gum-shadow overflow-hidden cursor-pointer hover:opacity-90 transition-opacity outline-none">
-                                                {profile.avatar_url ? (
-                                                    <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
-                                                ) : initials}
+                        ) : !profile ? (
+                            <div className="gum-card p-12 text-center text-muted-foreground">
+                                Profile not found.
+                            </div>
+                        ) : (
+                            <>
+                                <Link
+                                    to="/"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 gum-card bg-secondary text-xs font-bold hover:bg-primary hover:text-primary-foreground transition-colors w-fit"
+                                >
+                                    <ArrowLeft size={14} />
+                                    Back to Home
+                                </Link>
+                                <div className="gum-card overflow-hidden mb-8">
+                                    <div className="h-48 bg-secondary relative overflow-hidden flex items-center justify-center">
+                                        {profile.banner_url ? (
+                                            <img
+                                                src={profile.banner_url}
+                                                alt="Banner"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-2 opacity-20">
+                                                <ImageIcon size={48} />
+                                                <span className="text-xs font-bold uppercase tracking-widest">Genjutsu Illusion</span>
                                             </div>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-[90vw] max-h-[90vh] p-8 border-none bg-transparent shadow-none flex items-center justify-center">
-                                            <div className="relative group">
-                                                {profile.avatar_url ? (
-                                                    <img
-                                                        src={profile.avatar_url}
-                                                        alt={profile.username}
-                                                        className="max-w-full max-h-[80vh] rounded-[px] gum-border gum-shadow object-contain"
-                                                    />
-                                                ) : (
-                                                    <div className="w-48 h-48 rounded-[3px] gum-border bg-secondary flex items-center justify-center text-6xl font-bold gum-shadow">
-                                                        {initials}
+                                        )}
+                                    </div>
+                                    <div className="px-6 pb-6 relative">
+                                        <div className="absolute -top-12 left-6">
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <div className="w-24 h-24 rounded-[3px] gum-border bg-secondary flex items-center justify-center text-3xl font-bold gum-shadow overflow-hidden cursor-pointer hover:opacity-90 transition-opacity outline-none">
+                                                        {profile.avatar_url ? (
+                                                            <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
+                                                        ) : initials}
                                                     </div>
-                                                )}
-                                            </div>
-                                        </DialogContent>
-                                    </Dialog>
-                                </div>
+                                                </DialogTrigger>
+                                                <DialogContent className="max-w-[90vw] max-h-[90vh] p-8 border-none bg-transparent shadow-none flex items-center justify-center">
+                                                    <div className="relative group">
+                                                        {profile.avatar_url ? (
+                                                            <img
+                                                                src={profile.avatar_url}
+                                                                alt={profile.username}
+                                                                className="max-w-full max-h-[80vh] rounded-[px] gum-border gum-shadow object-contain"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-48 h-48 rounded-[3px] gum-border bg-secondary flex items-center justify-center text-6xl font-bold gum-shadow">
+                                                                {initials}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </div>
 
-                                <div className="flex justify-end pt-4">
-                                    {isOwnProfile ? (
-                                        <EditProfileDialog
-                                            currentProfile={{
-                                                display_name: profile.display_name,
-                                                bio: profile.bio,
-                                                avatar_url: profile.avatar_url,
-                                                banner_url: profile.banner_url
-                                            }}
-                                            onUpdate={fetchData}
-                                        />
-                                    ) : (
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex justify-end pt-4">
+                                            {isOwnProfile ? (
+                                                <EditProfileDialog
+                                                    currentProfile={{
+                                                        display_name: profile.display_name,
+                                                        bio: profile.bio,
+                                                        avatar_url: profile.avatar_url,
+                                                        banner_url: profile.banner_url
+                                                    }}
+                                                    onUpdate={fetchData}
+                                                />
+                                            ) : (
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            if (!user) {
+                                                                toast.error("Please sign in to send messages");
+                                                                return;
+                                                            }
+                                                            navigate(`/whisper/${profile.username}`);
+                                                        }}
+                                                        className="p-2 gum-card bg-secondary text-muted-foreground hover:text-primary transition-colors"
+                                                        title="Whisper"
+                                                    >
+                                                        <Send size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={toggleFollow}
+                                                        className={`gum-btn text-sm px-6 ${isFollowing ? 'bg-secondary' : 'bg-primary text-primary-foreground'}`}
+                                                    >
+                                                        {isFollowing ? 'Following' : 'Follow'}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="mt-8">
+                                            <h1 className="text-2xl font-bold tracking-tight">{profile.display_name}</h1>
+                                            <p className="text-muted-foreground">@{profile.username}</p>
+                                        </div>
+
+                                        <p className="mt-4 text-sm leading-relaxed max-w-xl">
+                                            {profile.bio || "No bio yet."}
+                                        </p>
+
+                                        <div className="flex flex-wrap gap-4 mt-6 text-sm text-muted-foreground">
+                                            <div className="flex items-center gap-1.5">
+                                                <Calendar size={16} />
+                                                <span>Joined {new Date(profile.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-6 mt-6">
                                             <button
                                                 onClick={() => {
-                                                    if (!user) {
-                                                        toast.error("Please sign in to send messages");
-                                                        return;
-                                                    }
-                                                    navigate(`/whisper/${profile.username}`);
+                                                    setFollowsModalType("following");
+                                                    setFollowsModalOpen(true);
                                                 }}
-                                                className="p-2 gum-card bg-secondary text-muted-foreground hover:text-primary transition-colors"
-                                                title="Whisper"
+                                                className="hover:underline flex items-center gap-1.5"
                                             >
-                                                <Send size={18} />
+                                                <span className="font-bold text-foreground">{stats.following}</span>
+                                                <span className="text-muted-foreground text-sm">Following</span>
                                             </button>
                                             <button
-                                                onClick={toggleFollow}
-                                                className={`gum-btn text-sm px-6 ${isFollowing ? 'bg-secondary' : 'bg-primary text-primary-foreground'}`}
+                                                onClick={() => {
+                                                    setFollowsModalType("followers");
+                                                    setFollowsModalOpen(true);
+                                                }}
+                                                className="hover:underline flex items-center gap-1.5"
                                             >
-                                                {isFollowing ? 'Following' : 'Follow'}
+                                                <span className="font-bold text-foreground">{stats.followers}</span>
+                                                <span className="text-muted-foreground text-sm">Followers</span>
                                             </button>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {isOwnProfile ? (
+                                        <div className="flex gap-2 border-b border-border pb-px mb-4">
+                                            {(["posts", "bookmarks"] as const).map((tab) => (
+                                                <button
+                                                    key={tab}
+                                                    onClick={() => setActiveTab(tab)}
+                                                    className={`px-6 py-2.5 text-sm font-bold capitalize transition-all relative flex items-center gap-2 ${activeTab === tab ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                                                >
+                                                    {tab === "bookmarks" && <Bookmark size={14} />}
+                                                    {tab}
+                                                    {activeTab === tab && (
+                                                        <motion.div
+                                                            layoutId="profileTab"
+                                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                                                        />
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <h2 className="font-bold text-lg px-2">Posts</h2>
+                                    )}
+
+                                    {activeTab === "posts" ? (
+                                        posts.length === 0 ? (
+                                            <div className="gum-card p-12 text-center text-muted-foreground text-sm">
+                                                No posts yet.
+                                            </div>
+                                        ) : (
+                                            posts.map(post => (
+                                                <PostCard
+                                                    key={post.id}
+                                                    post={post}
+                                                    onLike={handleLike}
+                                                    onBookmark={handleBookmark}
+                                                    onDelete={handleDelete}
+                                                />
+                                            ))
+                                        )
+                                    ) : (
+                                        bookmarks.length === 0 ? (
+                                            <div className="gum-card p-12 text-center flex flex-col items-center gap-4 bg-secondary/20 border-dashed">
+                                                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+                                                    <Bookmark size={32} className="text-primary/50" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-lg">No bookmarks yet</h3>
+                                                    <p className="text-sm text-muted-foreground mt-1">
+                                                        Save posts to find them later. Bookmarked posts still vanish after 24 hours.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            bookmarks.map(post => (
+                                                <PostCard
+                                                    key={post.id}
+                                                    post={post}
+                                                    onLike={handleLike}
+                                                    onBookmark={handleBookmark}
+                                                    onDelete={handleDelete}
+                                                />
+                                            ))
+                                        )
                                     )}
                                 </div>
-
-                                <div className="mt-8">
-                                    <h1 className="text-2xl font-bold tracking-tight">{profile.display_name}</h1>
-                                    <p className="text-muted-foreground">@{profile.username}</p>
-                                </div>
-
-                                <p className="mt-4 text-sm leading-relaxed max-w-xl">
-                                    {profile.bio || "No bio yet."}
-                                </p>
-
-                                <div className="flex flex-wrap gap-4 mt-6 text-sm text-muted-foreground">
-                                    <div className="flex items-center gap-1.5">
-                                        <Calendar size={16} />
-                                        <span>Joined {new Date(profile.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-6 mt-6">
-                                    <button
-                                        onClick={() => {
-                                            setFollowsModalType("following");
-                                            setFollowsModalOpen(true);
-                                        }}
-                                        className="hover:underline flex items-center gap-1.5"
-                                    >
-                                        <span className="font-bold text-foreground">{stats.following}</span>
-                                        <span className="text-muted-foreground text-sm">Following</span>
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setFollowsModalType("followers");
-                                            setFollowsModalOpen(true);
-                                        }}
-                                        className="hover:underline flex items-center gap-1.5"
-                                    >
-                                        <span className="font-bold text-foreground">{stats.followers}</span>
-                                        <span className="text-muted-foreground text-sm">Followers</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            {isOwnProfile ? (
-                                <div className="flex gap-2 border-b border-border pb-px mb-4">
-                                    {(["posts", "bookmarks"] as const).map((tab) => (
-                                        <button
-                                            key={tab}
-                                            onClick={() => setActiveTab(tab)}
-                                            className={`px-6 py-2.5 text-sm font-bold capitalize transition-all relative flex items-center gap-2 ${activeTab === tab ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                                        >
-                                            {tab === "bookmarks" && <Bookmark size={14} />}
-                                            {tab}
-                                            {activeTab === tab && (
-                                                <motion.div
-                                                    layoutId="profileTab"
-                                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                                                />
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <h2 className="font-bold text-lg px-2">Posts</h2>
-                            )}
-
-                            {activeTab === "posts" ? (
-                                posts.length === 0 ? (
-                                    <div className="gum-card p-12 text-center text-muted-foreground text-sm">
-                                        No posts yet.
-                                    </div>
-                                ) : (
-                                    posts.map(post => (
-                                        <PostCard
-                                            key={post.id}
-                                            post={post}
-                                            onLike={handleLike}
-                                            onBookmark={handleBookmark}
-                                            onDelete={handleDelete}
-                                        />
-                                    ))
-                                )
-                            ) : (
-                                bookmarks.length === 0 ? (
-                                    <div className="gum-card p-12 text-center flex flex-col items-center gap-4 bg-secondary/20 border-dashed">
-                                        <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
-                                            <Bookmark size={32} className="text-primary/50" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg">No bookmarks yet</h3>
-                                            <p className="text-sm text-muted-foreground mt-1">
-                                                Save posts to find them later. Bookmarked posts still vanish after 24 hours.
-                                            </p>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    bookmarks.map(post => (
-                                        <PostCard
-                                            key={post.id}
-                                            post={post}
-                                            onLike={handleLike}
-                                            onBookmark={handleBookmark}
-                                            onDelete={handleDelete}
-                                        />
-                                    ))
-                                )
-                            )}
-                        </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="hidden lg:block">

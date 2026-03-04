@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 import { useNavigate, Link } from "react-router-dom";
 import { getNow } from "@/lib/utils";
@@ -29,7 +30,32 @@ const Sidebar = ({ onAction }: SidebarProps) => {
   const [loading, setLoading] = useState(true);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
 
-  const [trendingTags, setTrendingTags] = useState<{ tag: string, count: number }[]>([]);
+  // Use TanStack Query for trending tags
+  const { data: trendingTags = [] } = useQuery({
+    queryKey: ["trending-tags"],
+    queryFn: async () => {
+      const { data: posts, error } = await supabase
+        .from("posts")
+        .select("tags")
+        .gt("created_at", new Date(getNow().getTime() - 24 * 60 * 60 * 1000).toISOString());
+
+      if (error) throw error;
+      if (!posts) return [];
+
+      const counts: Record<string, number> = {};
+      posts.forEach(p => {
+        (p.tags || []).forEach((t: string) => {
+          counts[t] = (counts[t] || 0) + 1;
+        });
+      });
+
+      return Object.entries(counts)
+        .map(([tag, count]) => ({ tag, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes (cache for performance)
+  });
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -72,33 +98,7 @@ const Sidebar = ({ onAction }: SidebarProps) => {
       }
     };
 
-    const fetchTrending = async () => {
-      try {
-        const { data: posts } = await supabase
-          .from("posts")
-          .select("tags")
-          .gt("created_at", new Date(getNow().getTime() - 24 * 60 * 60 * 1000).toISOString());
-
-        if (posts) {
-          const counts: Record<string, number> = {};
-          posts.forEach(p => {
-            (p.tags || []).forEach((t: string) => {
-              counts[t] = (counts[t] || 0) + 1;
-            });
-          });
-          const sorted = Object.entries(counts)
-            .map(([tag, count]) => ({ tag, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 5);
-          setTrendingTags(sorted);
-        }
-      } catch (error) {
-        console.error("Trending fetch error:", error);
-      }
-    };
-
     fetchSuggestions();
-    fetchTrending();
   }, [user]);
 
   // ... handleFollow
